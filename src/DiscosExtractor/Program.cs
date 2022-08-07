@@ -9,6 +9,10 @@ app.Configure(config =>
 						.WithExample(new []{"healthcheck", "--auth", "xxx"})
 						.WithExample(new []{"healthcheck", "-a", "xxx"});
 
+				  config.AddCommand<FetchObjectsCommand>("fetch'")
+						.WithDescription("Fetch Objects from DISCOSweb")
+						.WithExample(new[] {"fetch", "--auth", "xxx"});
+
 				  config.Settings.ApplicationName = "discosextractor";
 			  });
 
