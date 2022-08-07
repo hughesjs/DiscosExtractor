@@ -1,4 +1,3 @@
-using DiscosExtractor.Commands.Settings;
 using DiscosWebSdk.Clients;
 using DiscosWebSdk.Models.ResponseModels.DiscosObjects;
 using JetBrains.Annotations;
@@ -7,12 +6,14 @@ using Spectre.Cli;
 namespace DiscosExtractor.Commands.Definitions;
 
 [UsedImplicitly]
-public class HealthCheckCommand : DiscosCommandBase<HealthCheckCommandSettings>
+public class HealthCheckCommand : AsyncCommand
 {
-	public override async Task<int> ExecuteAsync(CommandContext context, HealthCheckCommandSettings settings)
+	private readonly DiscosClient _client;
+	public HealthCheckCommand(DiscosClient client) => _client = client;
+
+	public override async Task<int> ExecuteAsync(CommandContext context)
 	{
-		DiscosClient client  = GetClient(settings);
-		DiscosObject sputnik = await client.GetSingle<DiscosObject>("1");
+		DiscosObject sputnik = await _client.GetSingle<DiscosObject>("1");
 
 		if (sputnik.Name.Contains("Sputnik"))
 		{

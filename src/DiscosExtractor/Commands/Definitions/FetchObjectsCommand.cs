@@ -1,11 +1,11 @@
-using DiscosExtractor.Commands.Settings;
+
 using Spectre.Cli;
 
 namespace DiscosExtractor.Commands.Definitions;
 
-public class FetchObjectsCommand: DiscosCommandBase<FetchObjectsCommandSettings>
+public class FetchObjectsCommand: AsyncCommand
 {
-	public override async Task<int> ExecuteAsync(CommandContext context, FetchObjectsCommandSettings settings)
+	public override async Task<int> ExecuteAsync(CommandContext context)
 	{
 
 		throw new NotImplementedException();
