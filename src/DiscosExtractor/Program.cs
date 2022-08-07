@@ -1,18 +1,19 @@
 ﻿using System.Text.Json;
 using DiscosExtractor.Commands.Definitions;
+using DiscosExtractor.Infrastructure;
 using DiscosWebSdk.DependencyInjection;
+using DiscosWebSdk.Interfaces.Clients;
 using DiscosWebSdk.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
-using Spectre.Cli.Extensions.DependencyInjection;
 
 DiscosOptions options = GetOptions();
 
-ServiceCollection                  services  = new();
+ServiceCollection services = new();
 services.AddDiscosServices(options.DiscosApiUrl!, options.DiscosApiKey!);
 
-using DependencyInjectionRegistrar registrar = new(services);
-CommandApp                         app       = new(registrar);
+TypeRegistrar registrar = new(services);
+CommandApp    app       = new(registrar);
 
 app.Configure(config =>
 			  {
@@ -27,10 +28,12 @@ app.Configure(config =>
 				  config.Settings.ApplicationName = "discosextractor";
 			  });
 
+services.BuildServiceProvider().GetRequiredService<IDiscosClient>();
 
 app.Run(args);
 
 const string configPath = ".discosextractorrc";
+
 DiscosOptions GetOptions()
 {
 	DiscosOptions? opt = null;
@@ -53,16 +56,16 @@ DiscosOptions GetOptions()
 
 DiscosOptions? GetFromConfigFile()
 {
-	string         config =  File.ReadAllText(configPath);
+	string config = File.ReadAllText(configPath);
 	return JsonSerializer.Deserialize<DiscosOptions>(config);
 }
 
 DiscosOptions GetInteractively()
 {
 	Console.WriteLine("Please Enter The DISCOSweb URL (Leave Empty for Default)...");
-	string? discosUrl = Console.ReadLine();
-	if (string.IsNullOrWhiteSpace(discosUrl)) discosUrl = "https://discosweb.esoc.esa.int/api";
-	
+	string? discosUrl                                   = Console.ReadLine();
+	if (string.IsNullOrWhiteSpace(discosUrl)) discosUrl = "https://discosweb.esoc.esa.int/api/";
+
 	string? apiKey;
 	do
 	{
@@ -70,8 +73,8 @@ DiscosOptions GetInteractively()
 		apiKey = Console.ReadLine();
 	}
 	while (string.IsNullOrEmpty(apiKey));
-		
-	return new(){DiscosApiKey = apiKey, DiscosApiUrl = discosUrl};
+
+	return new() {DiscosApiKey = apiKey, DiscosApiUrl = discosUrl};
 }
 
 void SaveConfig(DiscosOptions opt)
