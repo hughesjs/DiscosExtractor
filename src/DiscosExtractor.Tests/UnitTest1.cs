@@ -1,4 +1,4 @@
-namespace Placeholder.Tests;
+namespace DiscosExtractor.Tests;
 
 public class UnitTest1
 {
