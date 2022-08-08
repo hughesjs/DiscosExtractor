@@ -10,7 +10,7 @@ using Spectre.Cli;
 DiscosOptions options = GetOptions();
 
 ServiceCollection services = new();
-services.AddDiscosServices(options.DiscosApiUrl!, options.DiscosApiKey!);
+services.AddDiscosServices(options.DiscosApiUrl!, options.DiscosApiKey!, true, true);
 
 TypeRegistrar registrar = new(services);
 CommandApp    app       = new(registrar);
