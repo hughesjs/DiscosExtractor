@@ -5,7 +5,8 @@ using DiscosWebSdk.DependencyInjection;
 using DiscosWebSdk.Interfaces.Clients;
 using DiscosWebSdk.Options;
 using Microsoft.Extensions.DependencyInjection;
-using Spectre.Cli;
+using Spectre.Console.Cli;
+
 
 DiscosOptions options = GetOptions();
 

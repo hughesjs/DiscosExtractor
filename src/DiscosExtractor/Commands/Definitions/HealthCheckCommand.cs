@@ -2,7 +2,7 @@ using DiscosWebSdk.Clients;
 using DiscosWebSdk.Interfaces.Clients;
 using DiscosWebSdk.Models.ResponseModels.DiscosObjects;
 using JetBrains.Annotations;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 
 namespace DiscosExtractor.Commands.Definitions;
 

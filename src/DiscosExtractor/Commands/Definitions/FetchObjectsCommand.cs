@@ -1,9 +1,8 @@
 using DiscosWebSdk.Interfaces.BulkFetching;
-using DiscosWebSdk.Models.EventPayloads;
 using DiscosWebSdk.Models.ResponseModels.DiscosObjects;
 using JetBrains.Annotations;
-using Spectre.Cli;
 using Spectre.Console;
+using Spectre.Console.Cli;
 
 namespace DiscosExtractor.Commands.Definitions;
 
