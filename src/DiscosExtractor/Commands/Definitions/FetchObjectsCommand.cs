@@ -3,26 +3,43 @@ using DiscosWebSdk.Models.EventPayloads;
 using DiscosWebSdk.Models.ResponseModels.DiscosObjects;
 using JetBrains.Annotations;
 using Spectre.Cli;
+using Spectre.Console;
 
 namespace DiscosExtractor.Commands.Definitions;
 
 [UsedImplicitly]
 public class FetchObjectsCommand: AsyncCommand
 {
-	public event EventHandler<DownloadStatus>? DownloadStatusChanged;
 	
 	private readonly IBulkFetchService<DiscosObject> _bulkFetchService;
+	private ProgressTaskSettings            _progressTaskSettings;
 
 	public FetchObjectsCommand(IBulkFetchService<DiscosObject> bulkFetchService)
 	{
+		_progressTaskSettings = new();
+		
 		_bulkFetchService                       =  bulkFetchService;
-		_bulkFetchService.DownloadStatusChanged += DownloadStatusChanged;
 	}
-
+	
 	public override async Task<int> ExecuteAsync(CommandContext context)
 	{
-		Console.WriteLine("Fetching data from DISCOSweb... There may be some pauses as this is a rate-limited API!");
-		await _bulkFetchService.GetAll();
+
+		List<DiscosObject> objects;
+		await AnsiConsole.Progress()
+						 .StartAsync(async ctx =>
+									 {
+										 // Define tasks
+										 ProgressTask objectDownload = ctx.AddTask("[green]Downloading DISCOS Objects[/]");
+
+										 _bulkFetchService.DownloadStatusChanged += (_, status) =>
+																						{
+																							objectDownload.MaxValue = status.Total;
+																							objectDownload.Increment(status.Downloaded - objectDownload.Value);
+																						};
+											 
+										 objects = await _bulkFetchService.GetAll();
+									 });
+
 		return 0;
 	}
 }
