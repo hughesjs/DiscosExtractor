@@ -1,20 +1,20 @@
-using DiscosExtractor.Commands.Settings;
 using DiscosWebSdk.Clients;
+using DiscosWebSdk.Interfaces.Clients;
 using DiscosWebSdk.Models.ResponseModels.DiscosObjects;
-using Spectre.Cli;
+using JetBrains.Annotations;
+using Spectre.Console.Cli;
 
 namespace DiscosExtractor.Commands.Definitions;
 
-public class HealthCheckCommand: AsyncCommand<HealthCheckCommandSettings>
+[UsedImplicitly]
+public class HealthCheckCommand : AsyncCommand
 {
-	public override async Task<int> ExecuteAsync(CommandContext context, HealthCheckCommandSettings settings)
+	private readonly IDiscosClient _client;
+	public HealthCheckCommand(IDiscosClient client) => _client = client;
+
+	public override async Task<int> ExecuteAsync(CommandContext context)
 	{
-		HttpClient   innerClient = new() {
-											 BaseAddress = new(GlobalConsts.DiscosApiUrl),
-											 DefaultRequestHeaders = { Authorization = new("bearer", settings.AuthKey)}
-										 };
-		DiscosClient client  = new(innerClient);
-		DiscosObject sputnik = await client.GetSingle<DiscosObject>("1");
+		DiscosObject sputnik = await _client.GetSingle<DiscosObject>("1");
 		
 		if (sputnik.Name.Contains("Sputnik"))
 		{
@@ -22,7 +22,6 @@ public class HealthCheckCommand: AsyncCommand<HealthCheckCommandSettings>
 			return 0;
 		}
 		
-		Console.WriteLine("Something is wrong... I don't know what though, diagnostics haven't been implemented yet!");
-		return 1;
+		throw new("Something is wrong... I don't know what though, diagnostics haven't been implemented yet!");
 	}
 }
