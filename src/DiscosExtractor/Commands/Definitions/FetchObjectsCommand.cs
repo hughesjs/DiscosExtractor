@@ -50,10 +50,12 @@ public class FetchObjectsCommand: AsyncCommand
 										 }
 									 });
 
-
-		Dictionary<string, List<DiscosModelBase>> outputDict = results.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value); // Needed because Serialize() can't do Types
-		await using FileStream fStream = new("resultsdict.json", FileMode.OpenOrCreate);
-		await JsonSerializer.SerializeAsync(fStream, outputDict);
+		foreach (KeyValuePair<Type, List<DiscosModelBase>> result in results)
+		{
+			await using FileStream fStream = new($"discos-{result.Key.Name}-{DateTime.Now:yyyyMMdd}.json", FileMode.OpenOrCreate);
+			await JsonSerializer.SerializeAsync(fStream, result.Value);
+		}
+	
 		return 0;
 	}
 }
