@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.tag_version.outputs.new_version }}
+      tag: ${{ steps.tag_version.outputs.new_tag }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
     steps:
     - uses: actions/checkout@v3 # Need the full commit history for conventional commit
     - name: Bump version and push tag
@@ -33,6 +35,9 @@ jobs:
       uses: mathieudutour/github-tag-action@v6.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: echo "${{ steps.tag_version.outputs.new_tag }}"
+    - run: echo "${{ steps.tag_version.outputs.new_version }}"
+    - run: echo "${{ steps.tag_version.outputs.changelog }}"
         
   windows-build:
     needs: semantic-release
@@ -45,7 +50,7 @@ jobs:
           dotnet-version: 6.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
-        run: dotnet publish -c Release -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ steps.tag_version.outputs.new_version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/win-x64
+        run: dotnet publish -c Release -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/win-x64
       - uses: actions/upload-artifact@v3
         with:
           name: win-exe
@@ -62,7 +67,7 @@ jobs:
           dotnet-version: 6.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
-        run: dotnet publish -c Release -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ steps.tag_version.outputs.new_version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/linux-x64
+        run: dotnet publish -c Release -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/linux-x64
       - uses: actions/upload-artifact@v3
         with:
           name: linux-exe
@@ -73,13 +78,14 @@ jobs:
     name: Build for MacOS
     runs-on: ubuntu-latest
     steps:
+      - run: echo "${{ needs.semantic-release.outputs.version }}"
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
-        run: dotnet publish -c Release -r osx-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PackageVersion=${{ steps.tag_version.outputs.new_version }} -p:UseAppHost=true --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/osx-x64 
+        run: dotnet publish -c Release -r osx-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} -p:UseAppHost=true --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/osx-x64 
       - uses: actions/upload-artifact@v3
         with:
             name: mac-exe
@@ -90,6 +96,7 @@ jobs:
       - windows-build
       - linux-build
       - mac-build
+      - semantic-release # Need this to share context
     name: Create GitHub Release
     runs-on: ubuntu-latest
     steps:
@@ -105,10 +112,14 @@ jobs:
         with:
           name: mac-exe
           path: ./discosextractor-osx
+      - run: echo "${{ needs }}"
+      - run: echo "${{ needs.semantic-release.outputs.tag }}"
+      - run: echo "${{ needs.semantic-release.outputs.version }}"
+      - run: echo "${{ needs.semantic-release.outputs.changelog }}"
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          tag: ${{ needs.semantic-release.outputs.tag }}
+          name: Release ${{ needs.semantic-release.outputs.version }}
+          body: ${{ needs.semantic-release.outputs.changelog }}
           artifacts: ./discosextractor-windows.exe,./discosextractor-linux,./discosextractor-osx
