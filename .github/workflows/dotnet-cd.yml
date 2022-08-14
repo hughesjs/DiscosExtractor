@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.tag_version.outputs.new_version }}
+      tag: ${{ steps.tag_version.outputs.new_tag }}
     steps:
     - uses: actions/checkout@v3 # Need the full commit history for conventional commit
     - name: Bump version and push tag
@@ -45,7 +46,7 @@ jobs:
           dotnet-version: 6.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
-        run: dotnet publish -c Release -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ steps.tag_version.outputs.new_version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/win-x64
+        run: dotnet publish -c Release -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/win-x64
       - uses: actions/upload-artifact@v3
         with:
           name: win-exe
@@ -62,7 +63,7 @@ jobs:
           dotnet-version: 6.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
-        run: dotnet publish -c Release -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ steps.tag_version.outputs.new_version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/linux-x64
+        run: dotnet publish -c Release -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/linux-x64
       - uses: actions/upload-artifact@v3
         with:
           name: linux-exe
@@ -79,7 +80,7 @@ jobs:
           dotnet-version: 6.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
-        run: dotnet publish -c Release -r osx-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PackageVersion=${{ steps.tag_version.outputs.new_version }} -p:UseAppHost=true --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/osx-x64 
+        run: dotnet publish -c Release -r osx-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} -p:UseAppHost=true --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/osx-x64 
       - uses: actions/upload-artifact@v3
         with:
             name: mac-exe
@@ -108,7 +109,7 @@ jobs:
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          tag: ${{ needs.semantic-release.outputs.version }}
+          name: Release ${{ needs.semantic-release.outputs.version }}
           body: ${{ steps.tag_version.outputs.changelog }}
           artifacts: ./discosextractor-windows.exe,./discosextractor-linux,./discosextractor-osx
