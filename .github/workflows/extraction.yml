@@ -1,0 +1,16 @@
+name: Download the latest data from DISCOSweb
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  extract:
+  name: Test Project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch Latest Data from DISCOSweb
+        uses: hughesjs/DiscosExtractAction@v0.1
+        with:
+          apiKey: ${{secrets.DISCOS_TOKEN}}
+      - name: Copy file 

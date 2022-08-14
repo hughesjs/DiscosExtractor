@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using DiscosWebSdk.Extensions;
 using DiscosWebSdk.Interfaces.BulkFetching;
+using DiscosWebSdk.Models.EventPayloads;
 using DiscosWebSdk.Models.ResponseModels;
 using JetBrains.Annotations;
 using Spectre.Console;
@@ -34,17 +35,25 @@ public class FetchObjectsCommand: AsyncCommand
 
 										 foreach (KeyValuePair<Type, ProgressTask> progressTask in progressTasks)
 										 {
-											 _bulkFetchService.DownloadStatusChanged += (_, status) =>
-																						{
-																							progressTask.Value.MaxValue = status.Total;
-																							progressTask.Value.Increment(status.Downloaded - progressTask.Value.Value);
-																						};
+											 void CallbackFunc(object? _, DownloadStatus status)
+											 {
+												 progressTask.Value.MaxValue = status.Total;
+												 progressTask.Value.Increment(status.Downloaded - progressTask.Value.Value);
+											 }
+
+											 _bulkFetchService.DownloadStatusChanged += CallbackFunc;
 											 progressTask.Value.StartTask();
 											 results.Add(progressTask.Key, await _bulkFetchService.GetAll(progressTask.Key));
+											 progressTask.Value.Value = progressTask.Value.MaxValue;
+											 progressTask.Value.StopTask();
+											 _bulkFetchService.DownloadStatusChanged -= CallbackFunc;
 										 }
 									 });
+
+
+		Dictionary<string, List<DiscosModelBase>> outputDict = results.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value); // Needed because Serialize() can't do Types
 		await using FileStream fStream = new("resultsdict.json", FileMode.OpenOrCreate);
-		await JsonSerializer.SerializeAsync(fStream, results);
+		await JsonSerializer.SerializeAsync(fStream, outputDict);
 		return 0;
 	}
 }
