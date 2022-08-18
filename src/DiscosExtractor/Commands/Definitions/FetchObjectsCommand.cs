@@ -53,7 +53,7 @@ public class FetchObjectsCommand: AsyncCommand
 		foreach (KeyValuePair<Type, List<DiscosModelBase>> result in results)
 		{
 			await using FileStream fStream = new($"discos-{result.Key.Name}-{DateTime.Now:yyyyMMdd}.json", FileMode.OpenOrCreate);
-			await JsonSerializer.SerializeAsync(fStream, result.Value);
+			await JsonSerializer.SerializeAsync(fStream, result.Value.Cast<object>().ToList()); // Need to serialise as List<object> to force it to serialise non-base props
 		}
 	
 		return 0;
