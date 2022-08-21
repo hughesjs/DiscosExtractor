@@ -43,7 +43,7 @@ public class FetchObjectsCommand: AsyncCommand
 
 											 _bulkFetchService.DownloadStatusChanged += CallbackFunc;
 											 progressTask.Value.StartTask();
-											 results.Add(progressTask.Key, await _bulkFetchService.GetAll(progressTask.Key));
+											 results.Add(progressTask.Key, await _bulkFetchService.GetAll(progressTask.Key, true));
 											 progressTask.Value.Value = progressTask.Value.MaxValue;
 											 progressTask.Value.StopTask();
 											 _bulkFetchService.DownloadStatusChanged -= CallbackFunc;
