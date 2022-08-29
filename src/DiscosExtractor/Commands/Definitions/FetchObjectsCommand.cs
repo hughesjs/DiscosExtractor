@@ -4,6 +4,7 @@ using DiscosWebSdk.Extensions;
 using DiscosWebSdk.Interfaces.BulkFetching;
 using DiscosWebSdk.Models.EventPayloads;
 using DiscosWebSdk.Models.ResponseModels;
+using DiscosWebSdk.Models.ResponseModels.Entities;
 using JetBrains.Annotations;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -30,6 +31,7 @@ public class FetchObjectsCommand: AsyncCommand
 										 Dictionary<Type, ProgressTask> progressTasks = new();
 										 foreach (Type t in typeof(DiscosModelBase).Assembly.GetTypes().Where(t => t.IsDiscosModel()))
 										 {
+											 if (t.IsAssignableTo(typeof(Entity))) continue;
 											 progressTasks.Add(t, ctx.AddTask($"[green]Downloading {t.Name} [/]", false));
 										 }
 
