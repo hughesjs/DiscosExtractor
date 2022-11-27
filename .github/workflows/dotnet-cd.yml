@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
     - name: Run tests
       run: dotnet test --logger GitHubActions ./src/DiscosExtractor.sln
 
@@ -61,7 +61,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 7.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
         run: dotnet publish -c Release -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:UseAppHost=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/linux-x64
@@ -78,7 +78,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 7.0.x
       - uses: actions/checkout@v3
       - name: Build Self-Contained
         run: dotnet publish -c Release -r osx-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PackageVersion=${{ needs.semantic-release.outputs.version }} -p:UseAppHost=true --self-contained ./src/DiscosExtractor.sln -o ./bin/Release/osx-x64 
