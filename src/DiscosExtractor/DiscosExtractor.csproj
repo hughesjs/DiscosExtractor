@@ -11,7 +11,7 @@
 
     <ItemGroup>
       <PackageReference Include="DiscosWebSdk" Version="1.8.2" />
-      <PackageReference Include="Spectre.Console" Version="0.43.0" />
+      <PackageReference Include="Spectre.Console" Version="0.46.0" />
     </ItemGroup>
 
     <ItemGroup>
